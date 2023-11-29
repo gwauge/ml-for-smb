@@ -22,7 +22,7 @@ FROM --platform=$TARGETPLATFORM mambaorg/micromamba:1.5.1 as micromamba
 # -----------------
 FROM --platform=linux/amd64 nvidia/cuda:11.8.0-cudnn8-runtime-ubi8 as amd64ubi8
 # Install compiler for .compile() with PyTorch 2.0 and nano for devcontainers
-RUN yum install -y git gcc gcc-c++ nano && yum clean all
+RUN yum install -y git gcc gcc-c++ nano git-lfs procps && yum clean all
 # Copy lockfile to container
 COPY conda-lock.yml /locks/conda-lock.yml
 
@@ -34,7 +34,7 @@ COPY conda-lock.yml /locks/conda-lock.yml
 # -----------------
 FROM --platform=linux/amd64 nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04 as amd64ubuntu
 # Install compiler for .compile() with PyTorch 2.0 and nano for devcontainers
-RUN apt-get update && apt-get install -y git gcc g++ nano openssh-client && apt-get clean
+RUN apt-get update && apt-get install -y git gcc g++ nano openssh-client git-lfs && apt-get clean
 # Copy lockfile to container
 COPY conda-lock.yml /locks/conda-lock.yml
 
@@ -65,7 +65,7 @@ USER root
 # if your image defaults to a non-root user, then you may want to make the
 # next 3 ARG commands match the values in your image. You can get the values
 # by running: docker run --rm -it my/image id -a
-ARG MAMBA_USER=mambauser
+ARG MAMBA_USER=mamba
 ARG MAMBA_USER_ID=57439
 ARG MAMBA_USER_GID=57439
 ENV MAMBA_USER=$MAMBA_USER
@@ -113,7 +113,7 @@ ARG TARGETPLATFORM
 # RUN --mount=type=cache,target=$MAMBA_ROOT_PREFIX/pkgs,id=conda-$TARGETPLATFORM,uid=$MAMBA_USER_ID,gid=$MAMBA_USER_GID ls -al /opt/conda/pkgs
 # Install dependencies from lockfile into environment, cache packages in /opt/conda/pkgs
 RUN --mount=type=cache,target=$MAMBA_ROOT_PREFIX/pkgs,id=conda-$TARGETPLATFORM,uid=$MAMBA_USER_ID,gid=$MAMBA_USER_GID \
-    micromamba install --name base --yes --file /locks/conda-lock.yml 
+    micromamba install --name base --yes --file /locks/conda-lock.yml
 
 # Install optional tricky pip dependencies that do not work with conda-lock
 # --no-deps --no-cache-dir to prevent conflicts with micromamba, might have to remove it depending on your use case
