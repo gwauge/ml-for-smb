@@ -1,6 +1,6 @@
-Execute in the background:
+Execute in the background with 10min timeout:
 ```bash
-nohup python src/leolm.py > output.log 2>&1 &
+nohup timeout 600 python src/leolm.py > output.log 2>&1 &
 ```
 
 ### View output

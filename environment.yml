@@ -18,6 +18,7 @@ dependencies:
   - wandb
   - lightning
   - transformers
+  - optimum
   - tokenizers
   - datasets
   - evaluate
@@ -47,6 +48,7 @@ dependencies:
       - pipx
       - simple_parsing
       - print-on-steroids[exceptions]
+      - autoawq
 
 # Non-standard section listing target platforms for conda-lock:
 platforms:
