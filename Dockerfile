@@ -34,7 +34,7 @@ COPY conda-lock.yml /locks/conda-lock.yml
 # -----------------
 FROM --platform=linux/amd64 nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04 as amd64ubuntu
 # Install compiler for .compile() with PyTorch 2.0 and nano for devcontainers
-RUN apt-get update && apt-get install -y git gcc g++ nano openssh-client git-lfs && apt-get clean
+RUN apt-get update && apt-get install -y git gcc g++ build-essential nvidia-cuda-toolkit nano openssh-client git-lfs && apt-get clean
 # Copy lockfile to container
 COPY conda-lock.yml /locks/conda-lock.yml
 

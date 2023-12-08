@@ -1,3 +1,5 @@
+llama.cpp/*
+
 data/*
 models/*
 !data/mock/
