@@ -17,16 +17,15 @@ Based on [Tutorial: How to convert HuggingFace model to GGUF format](https://git
 ### Use already converted GGUF models
 Remeber to adjust the model ID to your model
 ```bash
-huggingface-cli download TheBloke/leo-hessianai-13B-GGUF leo-hessianai-13b.Q8_0.gguf --local-dir models/ --local-dir-use-symlinks
-False
+huggingface-cli download TheBloke/leo-hessianai-13B-GGUF leo-hessianai-13b.Q8_0.gguf --local-dir models/ --local-dir-use-symlinks False
 ```
 
 ### Run model using llama.cpp
 ```bash
-llama.cpp/main -m models/leo-hessianai-7b.Q4_K_M.gguf -n -2 -c 0 -ngl 40 -p "Das Wetter in Potsdam soll"
+llama.cpp/main -m models/leo-hessianai-7b.Q4_K_M.gguf -n -2 -c 0 -ngl 33 -p "Das Wetter in Potsdam soll"
 ```
 ```bash
-llama.cpp/main -ngl 40 -m models/leo-hessianai-13b-chat.Q8_0.gguf --color -c 0 --temp 0.7 --repeat_penalty 1.1 -n -1 -p "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant"
+llama.cpp/main -ngl 41 -m models/leo-hessianai-13b-chat.Q8_0.gguf --color -c 0 --temp 0.7 --repeat_penalty 1.1 -n -1 -f prompts/long-doc-csv-export.txt
 ```
 ```bash
 llama.cpp/main -m models/leo-hessianai-7b-chat.Q8_0.gguf -n -1 -c 0 -ngl 33 -i -r "Benutzer:" -f prompts/rede-mit-bob.txt
@@ -40,6 +39,12 @@ llama.cpp/main -m models/leo-hessianai-7b-chat.Q8_0.gguf -n -1 -c 0 -ngl 33 -i -
     - use `0` to run on CPU only
 - `-p` prompt
 - `--batch-size` can be used, however it does not seem to make a difference in inference time, LeoLM default is `512` (I believe)
+
+### Run model using HTTP server (powered by llama.cpp)
+[Full documentation](https://github.com/ggerganov/llama.cpp/blob/master/examples/server/README.md)
+```bash
+llama.cpp/server -m models/leo-hessianai-13b-chat.Q8_0.gguf -ngl 41
+```
 
 ## ONNX
 ### Convert model to ONNX
@@ -57,15 +62,20 @@ optimum-cli export onnx --model LeoLM/leo-hessianai-7b-chat models/leolm-7b-chat
     - `41` is max for 13b-chat model
 
 ## TODO
-- [ ] run 70b model
-- [ ] context size test
-    - [ ] use long document as context
-    - [ ] ask for details throughout the text (e.g. "what are the names of the characters?")
-    - [ ] test out different output format in the prompt, such as `json` or `csv`
+- [x] run 70b model
+- [x] context size test
+    - [x] use long document as context
+    - [x] ask for details throughout the text (e.g. "what are the names of the characters?")
+    - [x] test out different output format in the prompt, such as `json` or `csv`
 - [ ] configuration matrix with test results
     - [ ] comments on the results, indicating success of output format, context size, etc.
     - [ ] eval time and GPU offloading for each
 - [ ] run script that lets user select model, context size, output format, input document, prompt, etc. (probably easiest using environment variables)
 
-## Prompts
-Gib mir eine Liste mit den Namen der Charaktere in dem Text, formatiert als CSV.
+## Long document comprehension and specific output format
+- all non-chat models are basically useless, don't answer questions and proceed with writing another article
+- chat models are better, able to deliver consistently formatted answers
+- however, quality of answers is still very low
+- 13b-chat works reasonably well
+- 70b-chat-Q4_K_M just produces "end of text" immediately
+- 70b-chat with higher quant is TBD
