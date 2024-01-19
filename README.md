@@ -36,7 +36,10 @@ llama.cpp/main -m models/leo-hessianai-7b-chat.Q8_0.gguf -n -1 -c 0 -ngl 33 -i -
 - `-n` number of tokens to generate, `-2` means generate until context is full
 - `-c` context size, `0` means  load from model (LeoLM uses `8192`)
 - `-ngl` n GPU layers, offload tensor layers of gguf model to GPU
-    - use `0` to run on CPU only
+    - `0` runs on CPU only
+    - `33` is max for 7b model
+    - `41` is max for 13b-chat model
+    - between `30` and `40` for 70b model
 - `-p` prompt
 - `--batch-size` can be used, however it does not seem to make a difference in inference time, LeoLM default is `512` (I believe)
 
@@ -46,6 +49,37 @@ llama.cpp/main -m models/leo-hessianai-7b-chat.Q8_0.gguf -n -1 -c 0 -ngl 33 -i -
 llama.cpp/server -m models/leo-hessianai-13b-chat.Q8_0.gguf -ngl 41
 ```
 
+## ollama
+### Starting ollama server
+```bash
+OLLAMA_MODELS=/workspaces/ml-for-smb/models/ ollama serve
+```
+
+### Running ollama model
+chat mode
+```bash
+ollama run mixtral:8x7b-instruct-v0.1-q3_K_M
+```
+with promp
+```bash
+ollama run mixtral:8x7b-instruct-v0.1-q3_K_M "$(cat prompts/long-doc-csv-export.txt)"
+```
+using API
+```bash
+curl http://localhost:11434/api/generate -d '{
+  "model": "mixtral:8x7b-instruct-v0.1-q3_K_M",
+  "prompt": "Nenne mir den Hauptcharakter des Films Titanic.",
+  "stream": false
+}'
+```
+
+### Benchmarking
+API calls return `eval_count` and `eval_duration` in nanoseconds
+
+$$
+tokens\_per\_sec = \frac{eval\_count}{eval\_duration \cdot 10^{-9}}
+$$
+
 ## ONNX
 ### Convert model to ONNX
 ```bash
@@ -54,12 +88,30 @@ optimum-cli export onnx --model LeoLM/leo-hessianai-7b-chat models/leolm-7b-chat
 
 ## Pitfalls
 ### llama.cpp
-- has to be compiled with LLAMA_cuBLAS=1 to enable GPU support
-    - might have to update the Makefile to correct GPU architecture, as "native" is unsupported
-- `-ngl|--n-gpu-layers` has to be set, in order to offload to layers to the GPU
-    - `0` runs on CPU only
-    - `33` is max for 7b model
-    - `41` is max for 13b-chat model
+- enabling GPU support
+    - llama.cpp has to be compiled with CUDA support
+    - might have to update the Makefile to correct GPU architecture, as [`arch=native` is unsupported in older Ubuntu versions](https://github.com/ggerganov/llama.cpp/discussions/2142#discussioncomment-6714308)
+        - run `nvcc --list-gpu-arch` inside container to see supported architectures, `compute_75` worked for me
+        - in `Makefile` under `ifdef LLAMA_CUBLAS` change from
+          ```bash
+          NVCCFLAGS = --forward-unknown-to-host-compiler -use_fast_math
+          ```
+          to
+          ```bash
+          NVCCFLAGS = --forward-unknown-to-host-compiler -use_fast_math -arch=compute_75
+          ```
+        - also under `ifdef CUDA_DOCKER_ARCH` inside the `else` block change from
+          ```bash
+          NVCCFLAGS += -arch=native
+          ```
+          to
+          ```bash
+          NVCCFLAGS += -arch=compute_75
+          ```
+    - ```bash
+      make LLAMA_CUBLAS=1
+      ```
+- `-ngl|--n-gpu-layers` has to be set, in order to offload to layers to the GPU (see [parameters](#parameters))
 
 ## TODO
 - [x] run 70b model
