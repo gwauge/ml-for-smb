@@ -46,7 +46,7 @@ llama.cpp/main -m models/leo-hessianai-7b-chat.Q8_0.gguf -n -1 -c 0 -ngl 33 -i -
 ### Run model using HTTP server (powered by llama.cpp)
 [Full documentation](https://github.com/ggerganov/llama.cpp/blob/master/examples/server/README.md)
 ```bash
-llama.cpp/server -m models/leo-hessianai-13b-chat.Q8_0.gguf -ngl 41
+llama.cpp/server -ngl 41 -m models/discolm_german_7b_v1.Q8_0.gguf -c 0 -n -1
 ```
 
 ## ollama
@@ -81,7 +81,7 @@ tokens\_per\_sec = \frac{eval\_count}{eval\_duration \cdot 10^{-9}}
 $$
 Sample benchmarking script can be found in [`src/ollama-benchmark.py`](src/ollama-benchmark.py)
 
-## Comparison LeoLM (llama.cpp) vs. Mixtal-8x7b (ollama)
+## Comparison of german language models
 In order to gauge the performancem, quality and obedience to output format requests of the models, I attempted to benchmark both models with the same custom prompts. The prompts used are
 - [`long-doc-json-export`](prompts/long-doc-json-export.txt),
 - [`long-doc-csv-export`](prompts/long-doc-csv-export.txt),
@@ -103,8 +103,17 @@ Each prompt was run five times for each model and the median tokens per second w
 | 34.79 | csv | 0/5 |
 | 39.26 | yes/no | 3/5 |
 
+### DiscoLM 7b Q8_0
+| Tokens per second | Requested format | Format obedience |
+|---|---|---|
+| 59.96 | json | 0/5 |
+| 61.54 | csv | 0/5 |
+| 62.8 | yes/no | 5/5 |
+
 ### Discussion
 Leo tends to put other things before the result such as "assistant" or "JSON Output:". This makes automated parsing of the output difficult. Mixtral performs better at this task, especially for complex formats and will only output the requested information. However, the quality of the answers still varies greatly. Mixtral also sometimes struggles with the yes/no format, as it will sometimes provide additional context to the answer such as "YES. The main ...". While both models are able to run relatively fast on the GPU with 24GB of VRAM, the quality of the answers is often suboptimal.
+
+While Disco is able to churn out about 20 tokens per second more than the other models, the quality and obediance are lacking. The model will often produce python code that attempts to generate the requested output format, instead of just outputting it itself. Other times it simply comes up with data that is entirely unrelated to the context. Each attempt at a more complex format was not usable. Simple yes/no prompts worked relatively well.
 
 ## ONNX
 ### Convert model to ONNX
