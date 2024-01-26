@@ -79,6 +79,32 @@ API calls return `eval_count` and `eval_duration` in nanoseconds
 $$
 tokens\_per\_sec = \frac{eval\_count}{eval\_duration \cdot 10^{-9}}
 $$
+Sample benchmarking script can be found in [`src/ollama-benchmark.py`](src/ollama-benchmark.py)
+
+## Comparison LeoLM (llama.cpp) vs. Mixtal-8x7b (ollama)
+In order to gauge the performancem, quality and obedience to output format requests of the models, I attempted to benchmark both models with the same custom prompts. The prompts used are
+- [`long-doc-json-export`](prompts/long-doc-json-export.txt),
+- [`long-doc-csv-export`](prompts/long-doc-csv-export.txt),
+- [`long-doc-yesno-export`](prompts/long-doc-yesno-export.txt).
+
+Each prompt was run five times for each model and the median tokens per second was taken. The results are shown in the table below.
+
+### Mixtral 8x7b instruct v0.1 Q3_K_M
+| Tokens per second | Requested format | Format obedience |
+|---|---|---|
+| 39.43 | json | 5/5 |
+| 40.04 | csv | 5/5 |
+| 42.95 | yes/no | 3/5 |
+
+### LeoLM 13b-chat Q8_0
+| Tokens per second | Requested format | Format obedience |
+|---|---|---|
+| 34.45 | json | 1/5 |
+| 34.79 | csv | 0/5 |
+| 39.26 | yes/no | 3/5 |
+
+### Discussion
+Leo tends to put other things before the result such as "assistant" or "JSON Output:". This makes automated parsing of the output difficult. Mixtral performs better at this task, especially for complex formats and will only output the requested information. However, the quality of the answers still varies greatly. Mixtral also sometimes struggles with the yes/no format, as it will sometimes provide additional context to the answer such as "YES. The main ...". While both models are able to run relatively fast on the GPU with 24GB of VRAM, the quality of the answers is often suboptimal.
 
 ## ONNX
 ### Convert model to ONNX
