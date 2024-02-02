@@ -16,8 +16,8 @@ logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 PROMPTS = [
     "../prompts/long-doc-json-export.txt",
-    "../prompts/long-doc-csv-export.txt",
-    "../prompts/long-doc-yesno-export.txt",
+    # "../prompts/long-doc-csv-export.txt",
+    # "../prompts/long-doc-yesno-export.txt",
 ]
 RUNS_PER_MODEL= 5
 
@@ -51,14 +51,15 @@ def leolm(prompt):
     }
 
 MODELS: typing.List[typing.Tuple[str, typing.Callable[[str], object]]] = [
-    ("mixtral:8x7b-instruct-v0.1-q3_K_M", mixtral),
-    ("leo-13b-chat-q8_0", leolm),
+    # ("mixtral:8x7b-instruct-v0.1-q3_K_M", mixtral),
+    # ("discolm-7b-q8_0", leolm),
+    ("miqu-1-70b-q4_k_m", leolm),
 ]
 
 def main():
     # import datafram from csv
-    # export = pd.read_csv(os.path.join(BENCHMARK_FOLDER, "benchmark.csv"))
-    export = pd.DataFrame(columns=["prompt", "model", "tps"])
+    export = pd.read_csv(os.path.join(BENCHMARK_FOLDER, "benchmark.csv"))
+    # export = pd.DataFrame(columns=["prompt", "model", "tps"])
     for prompt_file in PROMPTS:
         logging.info(f"[PROMPT] {prompt_file}")
         prompt = read_prompt(prompt_file)

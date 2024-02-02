@@ -119,10 +119,19 @@ Each prompt was run five times for each model and the median tokens per second w
 | 61.54 | csv | 0/5 |
 | 62.8 | yes/no | 5/5 |
 
+### MiQu 70b Q4_K_M
+| Tokens per second | Requested format | Format obedience |
+|---|---|---|
+| 0.9 | json | 0/1 |
+| 0.83 | csv | 0/1 |
+| 0.78 | yes/no | 1/1 |
+
 ### Discussion
 Leo tends to put other things before the result such as "assistant" or "JSON Output:". This makes automated parsing of the output difficult. Mixtral performs better at this task, especially for complex formats and will only output the requested information. However, the quality of the answers still varies greatly. Mixtral also sometimes struggles with the yes/no format, as it will sometimes provide additional context to the answer such as "YES. The main ...". While both models are able to run relatively fast on the GPU with 24GB of VRAM, the quality of the answers is often suboptimal.
 
 While Disco is able to churn out about 20 tokens per second more than the other models, the quality and obediance are lacking. The model will often produce python code that attempts to generate the requested output format, instead of just outputting it itself. Other times it simply comes up with data that is entirely unrelated to the context. Each attempt at a more complex format was not usable. Simple yes/no prompts worked relatively well.
+
+MiQu is by far biggest and therefor the slowest model. Using the 24GB of VRAM I was only able to offload 20 layers to the GPU, resulting in an inference time of less than 1 token per second. The quality of the answers is also very low, as the model struggles with the output format.
 
 ## ONNX
 ### Convert model to ONNX
