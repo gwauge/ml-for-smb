@@ -50,21 +50,30 @@ llama.cpp/server -ngl 41 -m models/discolm_german_7b_v1.Q8_0.gguf -c 0 -n -1
 ```
 
 ## ollama
-### Starting ollama server
+
+### Running without devcontainer
+```bash
+scripts/run-in-docker.sh -g 0 "scripts/start-ollama.sh"
+```
+`-g 0` specifies the GPU to use. Use `-g 0,1,...` to specify multiple GPUs.
+By default, the script will run *mixtral:8x7b-instruct-v0.1-q3_K_M*. To run a different model, modify `scripts/start-ollama.sh` accordingly. Port `11434` is also being passed through to the host in order to access the API.
+
+### Running inside devcontainer or bash shell
+#### Starting ollama server
 ```bash
 OLLAMA_MODELS=/workspaces/ml-for-smb/models/ ollama serve
 ```
 
-### Running ollama model
-chat mode
+#### Interact with model
+-  chat mode
 ```bash
 ollama run mixtral:8x7b-instruct-v0.1-q3_K_M
 ```
-with promp
+- with promp
 ```bash
 ollama run mixtral:8x7b-instruct-v0.1-q3_K_M "$(cat prompts/long-doc-csv-export.txt)"
 ```
-using API
+- using API (default port: 11434)
 ```bash
 curl http://localhost:11434/api/generate -d '{
   "model": "mixtral:8x7b-instruct-v0.1-q3_K_M",
@@ -154,10 +163,12 @@ optimum-cli export onnx --model LeoLM/leo-hessianai-7b-chat models/leolm-7b-chat
     - [x] use long document as context
     - [x] ask for details throughout the text (e.g. "what are the names of the characters?")
     - [x] test out different output format in the prompt, such as `json` or `csv`
-- [ ] configuration matrix with test results
-    - [ ] comments on the results, indicating success of output format, context size, etc.
-    - [ ] eval time and GPU offloading for each
-- [ ] run script that lets user select model, context size, output format, input document, prompt, etc. (probably easiest using environment variables)
+- [x] configuration matrix with test results
+    - [x] comments on the results, indicating success of output format, context size, etc.
+- [x] try out DiscoLM
+- [ ] promptengineering
+- [ ] local retrieval augmentation
+- [ ] run ollama without devcontainer
 
 ## Long document comprehension and specific output format
 - all non-chat models are basically useless, don't answer questions and proceed with writing another article

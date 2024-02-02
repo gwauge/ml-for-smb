@@ -10,9 +10,9 @@
 # We automatically detect W&B login credentials in the ~/.netrc file and pass them to the docker container. To store them, do wandb login once on the host machine.
 
 # Default values
-image="konstantinjdobler/nlp-research-template:latest"
+image="ml-for-smb:latest"
 command="bash"
-gpus="none"
+gpus="0,1"
 
 set -e
 
@@ -61,18 +61,6 @@ echo "image: $image"
 echo "command: $command"
 echo "gpus: $gpus"
 
-# Look for WANDB_API_KEY
-if [ -z "$WANDB_API_KEY" ]; then
-    export WANDB_API_KEY=$(awk '/api.wandb.ai/{getline; getline; print $2}' ~/.netrc)
-    if [ -z "$WANDB_API_KEY" ]; then
-        echo "WANDB_API_KEY not found"
-    else
-        echo "WANDB_API_KEY found in ~/.netrc"
-    fi
-else
-    echo "WANDB_API_KEY found in environment"
-fi
-
 # Tested on chairserver w/ 4x A6000 - doesn't bring speedups
 # # https://lightning.ai/docs/pytorch/stable/advanced/model_parallel.html#when-using-ddp-on-a-multi-node-cluster-set-nccl-parameters
 # export NCCL_NSOCKS_PERTHREAD=4
@@ -85,7 +73,8 @@ fi
 # Other common mounts:  -v /scratch/username/:/scratch/username/ -v /home/username/data/:/home/username/data/
 # Add -p 5678:5678 to expose port 5678 for remote debugging. But keep in mind that this will block the port for other docker users on the server, so you might have to choose a different one.
 docker run --rm -it --ipc=host \
-    -v "$(pwd)":/workspace -w /workspace \
+    -v "$(pwd)":/workspaces/ml-for-smb -w /workspaces/ml-for-smb \
+    -p 11434:11434 \
     --user $(id -u):$(id -g) \
     --env XDG_CACHE_HOME --env HF_DATASETS_CACHE --env WANDB_CACHE_DIR --env WANDB_DATA_DIR --env WANDB_API_KEY \
     --gpus=\"device=${gpus}\" $image $command
