@@ -133,11 +133,18 @@ While Disco is able to churn out about 20 tokens per second more than the other 
 
 MiQu is by far biggest and therefor the slowest model. Using the 24GB of VRAM I was only able to offload 20 layers to the GPU, resulting in an inference time of less than 1 token per second. The quality of the answers is also very low, as the model struggles with the output format.
 
-## ONNX
-### Convert model to ONNX
-```bash
-optimum-cli export onnx --model LeoLM/leo-hessianai-7b-chat models/leolm-7b-chat-onnx/
-```
+## LLM on mobile workstation
+### [Machine specs](https://www.acer.com/de-de/conceptd/laptops/conceptd-7-ezel/pdp/NX.C6ZEG.004)
+- CPU: Intel Xeon W-11955M ProzOcta-Coreessor  8x2,60 GHz 
+- GPU: NVIDIA RTX A5000 with 16GB VRAM
+- RAM: 32GB DDR4 SDRAM
+
+### Performance of Mixtral 8x7b instruct v0.1 for different quantizations
+| Quantization | Tokens per second |
+|---|---|
+| Q3_K_M | 8.71 |
+| Q4_K_M | 5.3 |
+| Q5_K_M | 4.45 |
 
 ## Pitfalls
 ### llama.cpp
@@ -175,9 +182,8 @@ optimum-cli export onnx --model LeoLM/leo-hessianai-7b-chat models/leolm-7b-chat
 - [x] configuration matrix with test results
     - [x] comments on the results, indicating success of output format, context size, etc.
 - [x] try out DiscoLM
+- [x] run ollama without devcontainer
 - [ ] promptengineering
-- [ ] local retrieval augmentation
-- [ ] run ollama without devcontainer
 
 ## Long document comprehension and specific output format
 - all non-chat models are basically useless, don't answer questions and proceed with writing another article
